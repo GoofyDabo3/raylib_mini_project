@@ -17,6 +17,8 @@ class Background{
         Layer layer[7][2];
         int layernum;
         int screenwidth;
+        int layer_gap;
+        int other_tile;
         void initLayer(int i, int j, const char *file, Vector2 pos, float speed);
     public:
         Background();
