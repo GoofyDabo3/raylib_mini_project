@@ -18,7 +18,6 @@ Player::Player()
     skin = PINKY;
     last_state = RUN;
     state = RUN;
-    jumping = false;
     jumpspeed = 0;
 
     initAnimation(animation[PINKY][RUN],"resources/Pinky_Run.png", 6);
@@ -48,20 +47,18 @@ void Player::initAnimation(textureAnimation& anim, const char* file, int frames)
 
 void Player::update()
 {
-    if(IsKeyPressed(KEY_SPACE) && !jumping)
+    if(IsKeyPressed(KEY_SPACE) && state != JUMP)
     {
         state = JUMP;
-        jumping = true;
         jumpspeed = -23;
     }
-    if(jumping)
+    if(state == JUMP)
     {
         playerPosition.y += jumpspeed;
         jumpspeed += GRAVITY;
         if(playerPosition.y > GROUND)
         {
             state = RUN;
-            jumping = false;
             jumpspeed = 0;
             toggle_center();
         }

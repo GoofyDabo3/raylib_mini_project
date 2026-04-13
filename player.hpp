@@ -42,7 +42,6 @@ class Player{
         float scale;
         Vector2 origin;
         Rectangle dest_rec;
-        bool jumping;
         float jumpspeed;
     
     public:
