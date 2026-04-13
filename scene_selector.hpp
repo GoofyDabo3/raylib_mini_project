@@ -3,6 +3,8 @@
 
 #include <raylib.h>
 #include <vector>
+#include "background.hpp"
+#include "game_scene.hpp"
 
 typedef enum Scene_enum{
     MAIN_MENU, 
@@ -14,9 +16,12 @@ class Scene_selector{
     private:
         Scene_enum current_scene;
         Scene_enum previous_scene;
+        GameScene gamescene;
+        Background background;
     public:
+        bool quit;
         Scene_selector();
-        void select_scene();
+        void update_scenes();
         ~Scene_selector();
 };
 
@@ -26,5 +31,6 @@ class Scene{
         Image backgorund;
 };
 
+bool DrawButton(Rectangle rect, const char* text);
 
 #endif
