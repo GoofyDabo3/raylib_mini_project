@@ -2,12 +2,13 @@
 #define GAME_SCENE
 
 #include <raylib.h>
-#include "player.hpp"
+#include "entities.hpp"
 #include "background.hpp"
 
 class GameScene{
     private:
         Player player;
+        Enemy enemy;
         Layer foreground;
     public:
         void update();
