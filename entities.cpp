@@ -19,20 +19,27 @@ void Entity::initAnimation(textureAnimation& anim, const char* file, int frames)
     anim.sourceRec = {0.0f, 0.0f, anim.framewidth, anim.frameheight};
 }
 
+Rectangle Entity::get_collision_rec()
+{
+    return {
+        dest_rec.x + hitbox_shrink,
+        dest_rec.y + hitbox_shrink,
+        dest_rec.width - hitbox_shrink * 2,
+        dest_rec.height - hitbox_shrink
+    };
+}
+
 void Entity::toggle_center()
 {
-    Position = {
-        static_cast<float>(GetScreenWidth() / 4),
-        static_cast<float>(GROUND) 
-    };
+    position.y = GROUND;
 }
 
 Player::Player()
 {
-    Position = {
-        static_cast<float>(GetScreenWidth() / 4),
-        static_cast<float>(GetScreenHeight() - 300) 
-    };
+    hp = 10;
+    skin = PINKY;
+    last_state = RUN;
+    state = RUN;
     delaycounter = 0;
     currentframe = 0;
     Speed = 3;
@@ -42,10 +49,8 @@ Player::Player()
     };
     rotation = 0.0f;
     scale = 4;
-    skin = PINKY;
-    last_state = RUN;
-    state = RUN;
     jumpspeed = 0;
+    hitbox_shrink = 25.0f;
 
     initAnimation(animation[PINKY][RUN],"resources/player/Pinky_Run.png", 6);
     initAnimation(animation[PINKY][JUMP],"resources/player/Pinky_Jump.png", 8);
@@ -61,6 +66,11 @@ Player::Player()
     initAnimation(animation[DUDE][JUMP],"resources/player/Dude_Jump.png", 8);
     initAnimation(animation[DUDE][HURT],"resources/player/Dude_Hurt.png", 4);
     initAnimation(animation[DUDE][DEAD],"resources/player/Dude_Dead.png", 8);
+
+    position = {
+        static_cast<float>(GetScreenWidth() / 4),
+        GROUND
+    };
 }
 
 void Player::update()
@@ -72,9 +82,9 @@ void Player::update()
     }
     if(state == JUMP)
     {
-        Position.y += jumpspeed;
+        position.y += jumpspeed;
         jumpspeed += GRAVITY;
-        if(Position.y > GROUND)
+        if(position.y >= GROUND)
         {
             state = RUN;
             jumpspeed = 0;
@@ -88,16 +98,24 @@ void Player::update()
     last_state = state;
 }
 
-void Player::animate()
+bool Player::animate()
 {
+    if(state == HURT && currentframe >= animation[skin][state].framecount - 1)
+    {
+        state = RUN;
+    }
+    else if(state == DEAD && currentframe >= animation[skin][state].framecount - 1)
+    {
+        return true;
+    }
     if(last_state != state)
     {
         delaycounter = 0;
         currentframe = 0;
     }
     dest_rec = {
-        Position.x,
-        Position.y,
+        position.x,
+        position.y - animation[skin][state].sourceRec.height * scale,
         animation[skin][state].sourceRec.width * scale, 
         animation[skin][state].sourceRec.height * scale
     };
@@ -110,13 +128,45 @@ void Player::animate()
         currentframe%= animation[skin][state].framecount;
         animation[skin][state].sourceRec.x = animation[skin][state].framewidth * currentframe;
     }
-
+    DrawRectangleLinesEx(get_collision_rec(), 2, RED);
     DrawTexturePro(animation[skin][state].texture, animation[skin][state].sourceRec, dest_rec, origin, rotation, WHITE);
+    return false;
 }
 
 void Player::switch_skin()
 {
     skin = static_cast<PlayerSkin>((static_cast<int>(skin) + 1) % 3);
+}
+
+std::string Player::get_hp()
+{
+    return "HP: " + std::to_string(hp);
+}
+
+void Player::hurt()
+{
+    if(state != HURT)
+    {
+        hp -= 20;
+        currentframe = 0;
+        if(hp <= 0)
+        {
+            die();
+        }
+        else
+        {
+            state = HURT;
+        }
+    }
+}
+
+void Player::die()
+{
+    if(state = DEAD) return;
+
+    state = DEAD;
+    currentframe = 0;
+    hp = 0;
 }
 
 Player::~Player()
@@ -151,27 +201,33 @@ Enemy::Enemy()
     last_state = WALK;
     state = WALK;
     speed = 5;
+    hitbox_shrink = 30.0f;
+    cooldown = 2.0f;
+    attack_time = -cooldown;
 
     initAnimation(animation[WALK],"resources/enemy/RedSlime_Walk.png", 8);
     initAnimation(animation[ATTACK],"resources/enemy/RedSlime_Attack.png", 4);
 
-    Position = {
-        GetScreenWidth() - animation[WALK].framewidth * scale,
-        static_cast<float>(GetScreenHeight() - 300) 
+    position = {
+        static_cast<float>(GetScreenWidth()),
+        GROUND
     };
 }
 
 void Enemy::update()
 {
-    Position.x -= speed;
-
+    position.x -= speed;
+    if(position.x < -animation[WALK].framewidth)
+    {
+        position.x = GetScreenWidth() + animation[WALK].framewidth;
+    }
 }
 
 void Enemy::animate()
 {
     dest_rec = {
-        Position.x,
-        Position.y,
+        position.x,
+        position.y - animation[state].sourceRec.height * scale,
         animation[state].sourceRec.width * scale, 
         animation[state].sourceRec.height * scale
     };
@@ -184,9 +240,30 @@ void Enemy::animate()
         currentframe%= animation[state].framecount;
         animation[state].sourceRec.x = animation[state].framewidth * currentframe;
     }
-
+    DrawRectangleLinesEx(get_collision_rec(), 2, RED);
     DrawTexturePro(animation[state].texture, animation[state].sourceRec, dest_rec, origin, rotation, WHITE);
 }
+
+Rectangle Enemy::get_collision_rec()
+{
+    return {
+        dest_rec.x + hitbox_shrink,
+        dest_rec.y + hitbox_shrink * 3,
+        dest_rec.width - hitbox_shrink * 2,
+        dest_rec.height - hitbox_shrink * 3
+    };
+}
+
+void Enemy::attack(Player &player)
+{
+    current_time = GetTime();
+    if(current_time - attack_time >= cooldown)
+    {
+        attack_time = current_time;
+        player.hurt();
+    }
+}
+
 
 Enemy::~Enemy()
 {

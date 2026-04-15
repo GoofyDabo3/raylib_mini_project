@@ -21,10 +21,12 @@ void Scene_selector::update_scenes()
     switch (current_scene)
     {
         case MAIN_MENU:
+
             background.draw(GRAY);
             if(DrawButton({100, 100, 200, 50}, "PLAY"))
             {
                 current_scene = GAME;
+                // gamescene.reset();
             }
             else if(DrawButton({100, 200, 200, 50}, "QUIT") || IsKeyPressed(KEY_ESCAPE))
             {
@@ -33,6 +35,10 @@ void Scene_selector::update_scenes()
             break;
 
         case GAME:
+            if(gamescene.is_over())
+            {
+                current_scene = OVER;
+            }
             background.update();
             gamescene.update();
             background.draw();
@@ -43,7 +49,9 @@ void Scene_selector::update_scenes()
                 current_scene = PAUSE;
             }
             break;
+
         case PAUSE:
+
             background.draw(GRAY);
             if(DrawButton({100, 100, 200, 50}, "RESUME"))
             {
@@ -55,7 +63,20 @@ void Scene_selector::update_scenes()
             }
             break;
 
+        case OVER:
+            background.draw(RED);
+            if(DrawButton({100, 100, 200, 50}, "RESTART"))
+            {
+                // gamescene.reset();
+                current_scene = GAME;
+            }
+            else if(DrawButton({100, 200, 200, 50}, "MAIN MENU"))
+            {
+                current_scene = MAIN_MENU;
+            }
+
         default:
+        
             break;
     }
     previous_scene = current_scene;

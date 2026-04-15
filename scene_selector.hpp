@@ -9,7 +9,8 @@
 typedef enum Scene_enum{
     MAIN_MENU, 
     PAUSE, 
-    GAME
+    GAME,
+    OVER
 }Scene_enum;
 
 class Scene_selector{

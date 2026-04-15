@@ -8,11 +8,15 @@
 class GameScene{
     private:
         Player player;
-        Enemy enemy;
+        Enemy slime;
         Layer foreground;
+        bool game_over;
     public:
+        GameScene();
         void update();
         void draw();
+        bool is_over();
+        void reset();
 };
 
 
