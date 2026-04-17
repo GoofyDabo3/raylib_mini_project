@@ -50,7 +50,7 @@ class Entity{
         Entity();
         void initAnimation(textureAnimation& anim, const char* file, int frames);
         Rectangle get_collision_rec();
-        void toggle_center();
+        void toggle_ground();
         ~Entity();
 };
 

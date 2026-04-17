@@ -10,6 +10,8 @@ class GameScene{
         Player player;
         Enemy slime;
         Layer foreground;
+        float elapsed_time;
+        float time_limit;
         bool game_over;
     public:
         GameScene();

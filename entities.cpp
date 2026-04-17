@@ -29,14 +29,14 @@ Rectangle Entity::get_collision_rec()
     };
 }
 
-void Entity::toggle_center()
+void Entity::toggle_ground()
 {
     position.y = GROUND;
 }
 
 Player::Player()
 {
-    hp = 10;
+    hp = 100;
     skin = PINKY;
     last_state = RUN;
     state = RUN;
@@ -80,15 +80,18 @@ void Player::update()
         state = JUMP;
         jumpspeed = -23;
     }
-    if(state == JUMP)
+    if(state == JUMP || (last_state == JUMP && position.y < GROUND))
     {
         position.y += jumpspeed;
         jumpspeed += GRAVITY;
-        if(position.y >= GROUND)
+        if (position.y >= GROUND)
         {
-            state = RUN;
-            jumpspeed = 0;
-            toggle_center();
+            toggle_ground();
+            if(state == JUMP)
+            {
+                state = RUN;
+                jumpspeed = 0;
+            }
         }
     }
     if(IsKeyPressed(KEY_X))
@@ -162,11 +165,19 @@ void Player::hurt()
 
 void Player::die()
 {
-    if(state = DEAD) return;
+    if(state == DEAD) return;
 
     state = DEAD;
     currentframe = 0;
     hp = 0;
+}
+
+void Player::reset()
+{
+    state = RUN;
+    hp = 100;
+    jumpspeed = 0;
+    toggle_ground();
 }
 
 Player::~Player()
@@ -264,6 +275,14 @@ void Enemy::attack(Player &player)
     }
 }
 
+void Enemy::reset()
+{
+    state = WALK;
+    position = {
+        static_cast<float>(GetScreenWidth()),
+        GROUND
+    };
+}
 
 Enemy::~Enemy()
 {

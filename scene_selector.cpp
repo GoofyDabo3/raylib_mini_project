@@ -25,8 +25,8 @@ void Scene_selector::update_scenes()
             background.draw(GRAY);
             if(DrawButton({100, 100, 200, 50}, "PLAY"))
             {
+                gamescene.reset();
                 current_scene = GAME;
-                // gamescene.reset();
             }
             else if(DrawButton({100, 200, 200, 50}, "QUIT") || IsKeyPressed(KEY_ESCAPE))
             {
@@ -67,13 +67,14 @@ void Scene_selector::update_scenes()
             background.draw(RED);
             if(DrawButton({100, 100, 200, 50}, "RESTART"))
             {
-                // gamescene.reset();
+                gamescene.reset();
                 current_scene = GAME;
             }
             else if(DrawButton({100, 200, 200, 50}, "MAIN MENU"))
             {
                 current_scene = MAIN_MENU;
             }
+            break;
 
         default:
         
